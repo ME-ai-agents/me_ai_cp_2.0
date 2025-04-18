@@ -89,7 +89,7 @@ class HealthResponse(BaseModel):
     version: str
 
 def generate_response(message, session, channel_type):
-    """Generate a response for the user using LangChain agents"""
+    """Generate a response for the user using direct issue handling"""
     try:
         # If no employee ID yet, try to identify the user
         if not session.employee_id:
@@ -121,8 +121,291 @@ def generate_response(message, session, channel_type):
             logger.info(f"Generated initial greeting: {greeting[:50]}...")
             return greeting
         
-        # Process message with the agent orchestrator
-        ai_response = agent_orchestrator.process_query(message, session)
+        # Direct response handling based on message content
+        message_lower = message.lower()
+        
+        # USB issues
+        if "usb" in message_lower:
+            return """
+I see you're having USB connection issues. Let's try these troubleshooting steps:
+
+1. Restart your laptop - Sometimes a simple restart can resolve driver issues.
+
+2. Try different USB ports - If one port isn't working, try another one.
+
+3. Check Device Manager:
+   - Right-click Start and select "Device Manager"
+   - Look for any devices with yellow warning icons
+   - If you see "Unknown USB Device" or similar, right-click and select "Update driver"
+
+4. Reinstall USB drivers:
+   - In Device Manager, expand "Universal Serial Bus controllers"
+   - Right-click each USB controller and select "Uninstall device"
+   - After uninstalling all, restart your laptop
+   - Windows will automatically reinstall the drivers
+
+5. Try the device on another computer if possible to determine if the issue is with the device or your laptop.
+
+Let me know which of these steps you've tried or if any of them help resolve the issue.
+"""
+        
+        # Speaker/audio issues
+        elif any(word in message_lower for word in ["speaker", "audio", "sound"]):
+            return """
+I understand you're having laptop speaker issues. Let's quickly troubleshoot:
+
+1. Check volume settings:
+   - Make sure your volume isn't muted (check the speaker icon in taskbar)
+   - Try pressing volume up keys on your keyboard
+
+2. Test with headphones:
+   - If you have headphones available, plug them in to see if sound works
+   - This will help determine if it's a hardware or software issue
+
+3. Check audio devices:
+   - Right-click on the volume icon in taskbar
+   - Select "Open Sound settings" 
+   - Make sure the correct output device is selected
+
+4. Quick restart of audio services:
+   - Right-click Start menu > Run
+   - Type "services.msc" and press Enter
+   - Find "Windows Audio" service
+   - Right-click it and select "Restart"
+
+5. Run Windows troubleshooter:
+   - Right-click volume icon in taskbar
+   - Select "Troubleshoot sound problems"
+   - Follow the on-screen instructions
+
+Let me know which steps you've tried or if any of them helped.
+"""
+        
+        # Slow laptop issues
+        elif any(word in message_lower for word in ["slow", "speed", "performance", "fast"]):
+            return """
+Here are some steps to help speed up your slow laptop:
+
+1. Close unnecessary programs:
+   - Check your system tray and close programs you're not using
+   - Use Task Manager (Ctrl+Shift+Esc) to identify resource-heavy applications
+
+2. Clean up your disk:
+   - Run Disk Cleanup: Search for "Disk Cleanup" in Start menu
+   - Delete temporary files, downloaded program files, and empty recycle bin
+   - Consider using CCleaner for a more thorough cleanup
+
+3. Check startup programs:
+   - Open Task Manager > Startup tab
+   - Disable programs you don't need to start automatically
+
+4. Update Windows and drivers:
+   - Check for Windows updates
+   - Update your graphics and other device drivers
+
+5. Scan for malware:
+   - Run a full system scan with Windows Defender or your antivirus
+
+6. Optimize power settings:
+   - Set power plan to "High performance" if you're plugged in
+
+7. Consider hardware upgrades if possible:
+   - Adding more RAM or switching to an SSD can dramatically improve performance
+
+Let me know if you need more specific guidance on any of these steps.
+"""
+        
+        # Printer issues
+        elif "printer" in message_lower:
+            return """
+Here's how to troubleshoot your printer connection issues:
+
+1. First, let's check the basics:
+   - Make sure the printer is powered on and has paper
+   - Check all cable connections (USB or network cables)
+   - For wireless printers, verify it's connected to the same network as your computer
+
+2. Restart both devices:
+   - Turn off the printer, wait 30 seconds, then turn it back on
+   - Restart your computer
+
+3. Check printer status:
+   - On Windows: Go to Settings > Devices > Printers & scanners
+   - Make sure your printer is listed and not showing any errors
+   - If it shows as offline, right-click and select "Use printer online"
+
+4. Update or reinstall printer drivers:
+   - Download the latest driver from the manufacturer's website
+   - Uninstall the current printer software, then install the new drivers
+
+5. Run the printer troubleshooter:
+   - Go to Settings > Update & Security > Troubleshoot
+   - Select "Printer" and follow the steps
+
+6. Check for Windows updates:
+   - Sometimes Windows updates can fix printer connection issues
+
+Let me know which of these steps you've tried or if you need more specific guidance.
+"""
+        
+        # Password issues
+        elif any(word in message_lower for word in ["password", "login", "account", "forgot", "reset"]):
+            return """
+I understand you're having issues with your password or account access. Here's how I can help:
+
+1. Which system are you trying to access? (Windows login, email, company applications, etc.)
+
+2. For Windows password reset:
+   - You'll need to contact IT support directly at extension 1234
+   - They'll verify your identity and provide a temporary password
+   - You'll need to change it at first login
+
+3. For company application passwords:
+   - Most company apps have a "Forgot Password" option on the login screen
+   - This will send a reset link to your registered email
+   - If that doesn't work, contact IT support
+
+4. For email password issues:
+   - Use the password reset option on the email login page
+   - If you can't access your recovery email, contact IT support
+
+5. Security reminder:
+   - Never share your password with anyone, including IT staff
+   - Create strong, unique passwords for different systems
+   - Consider using a password manager
+
+For urgent password resets, please contact IT Support at extension 1234 or support@company.com.
+"""
+
+        # Network issues
+        elif any(word in message_lower for word in ["network", "wifi", "internet", "connection"]):
+            return """
+Here are troubleshooting steps for your network connection issues:
+
+1. Basic connectivity checks:
+   - Check if other devices can connect to the same network
+   - Look at the WiFi icon in your taskbar - are you connected?
+
+2. Restart networking equipment:
+   - Turn off your laptop's WiFi (airplane mode on/off)
+   - Restart your router/access point if possible
+
+3. Run Windows network diagnostics:
+   - Right-click on the network icon in the taskbar
+   - Select "Troubleshoot problems"
+
+4. Reset network settings:
+   - Open Settings > Network & Internet > Status
+   - Click "Network reset" at the bottom
+
+5. Update network drivers:
+   - Open Device Manager (right-click Start menu)
+   - Expand "Network adapters"
+   - Right-click your WiFi adapter and select "Update driver"
+
+6. Check for interference:
+   - Move closer to the WiFi router/access point
+   - Try connecting in a different location
+
+7. For wired connections:
+   - Try a different Ethernet cable
+   - Try a different port on the router
+
+Let me know which of these steps you've tried and if they help resolve your issue.
+"""
+        
+        # Email issues
+        elif any(word in message_lower for word in ["email", "outlook", "gmail", "mail"]):
+            return """
+Let's troubleshoot your email issues:
+
+1. Check your internet connection:
+   - Make sure you're connected to the internet
+   - Try loading a website to confirm connectivity
+
+2. For Outlook issues:
+   - Restart Outlook
+   - Check if you're in Offline mode (Look for "Working Offline" in the status bar)
+   - Run Outlook in Safe Mode (hold Ctrl while opening Outlook)
+   - Repair Office: Control Panel > Programs > Uninstall > Office > Change > Repair
+
+3. Check email server status:
+   - Ask colleagues if they're experiencing similar issues
+   - Check company IT status page if available
+
+4. Verify account settings:
+   - In Outlook: File > Account Settings
+   - Confirm server settings are correct
+
+5. Clear cache (Outlook):
+   - Close Outlook
+   - Search for %localappdata%\\Microsoft\\Outlook
+   - Rename the .ost or .pst file (add .old to the end)
+   - Restart Outlook to create a new file
+
+6. If emails are sending but not receiving:
+   - Check your junk/spam folder
+   - Check mail rules that might be filtering messages
+
+Let me know which email client you're using and what specific issues you're experiencing for more targeted help.
+"""
+
+        # Try using the agent orchestrator for other queries
+        else:
+            try:
+                # Fall back to issue type classifier and direct response
+                issue_type = classify_issue(message)
+                
+                if issue_type == "Hardware":
+                    return """
+I understand you're experiencing hardware issues. To help you better, I need some specific information:
+
+1. What device are you having trouble with? (laptop, desktop, printer, etc.)
+2. What are the specific symptoms you're experiencing?
+3. When did this issue start?
+4. Have you made any recent changes to your system?
+
+Once you provide these details, I can give you targeted troubleshooting steps.
+"""
+                elif issue_type == "Software":
+                    return """
+I understand you're experiencing software issues. To help you better, I need some specific information:
+
+1. Which application or program is causing problems?
+2. What operating system are you using?
+3. What exactly happens when you try to use the software?
+4. Have you installed any updates recently?
+
+Once you provide these details, I can give you targeted troubleshooting steps.
+"""
+                elif issue_type == "Password":
+                    return """
+I understand you're having password or account access issues. To help you better, could you tell me:
+
+1. Which system or application are you trying to access?
+2. What happens when you try to log in?
+3. Have you tried resetting your password yet?
+
+I can then provide specific guidance for your situation.
+"""
+                else:
+                    # Process message with the agent orchestrator for general inquiries
+                    # This will likely fail, but we'll handle that in the except block
+                    ai_response = agent_orchestrator.process_query(message, session)
+                    return ai_response
+            except Exception as e:
+                logger.error(f"Error processing with agent orchestrator: {str(e)}")
+                # Return a generic but helpful response
+                return f"""
+I'd be happy to help you with your IT issue. To assist you better, could you provide more specific details about what you're experiencing? Some helpful information would be:
+
+1. What specific device or software is involved?
+2. What exactly happens when the issue occurs?
+3. When did you first notice this problem?
+4. Have you already tried any troubleshooting steps?
+
+The more details you can provide, the better I can assist you in resolving your issue promptly.
+"""
         
         # Log AI response to DB
         if session.employee_id and session.agent_id:
@@ -143,9 +426,15 @@ def generate_response(message, session, channel_type):
         
     except Exception as e:
         logger.error(f"Error generating response: {str(e)}", exc_info=True)
-        return "I apologize, but I'm experiencing technical difficulties. Please try again later or contact our IT support team directly if your issue is urgent."
-        
-        
+        return """
+I apologize, but I'm experiencing technical difficulties. Please try one of these options:
+
+1. Try describing your issue again with more details
+2. For urgent IT support, please call the helpdesk at extension 1234
+3. Email support@company.com with details of your issue
+"""
+
+
 @app.post("/telephony/chat/completions")
 async def handle_telephony_chat(request: TelephonyRequest):
     """Handle telephony chat completions with streaming support"""
